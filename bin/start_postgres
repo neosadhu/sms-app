@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Check if PostgreSQL is installed
+if command -v psql >/dev/null 2>&1; then
+    echo "PostgreSQL is already installed. Skipping download."
+else
+    # Download PostgreSQL
+    echo "Install Postgres from source"
+    brew install postgresql@13
+fi
+
+# Specify the PostgreSQL data directory
+data_dir=$PWD/data
+
+# Check if the cluster is initialized
+pg_isready -q -d "$data_dir"
+
+# Store the exit code of the previous command
+exit_code=$?
+# Initialize or exit with appropriate message based on the exit code
+if [ $exit_code -eq 0 ]; then
+    echo "PostgreSQL cluster is initialized and accepting connections."
+else
+    echo "PostgreSQL cluster is not initialized."
+    initdb -D data/
+fi
+
+
+# Start PostgreSQL
+pg_ctl -D data -l logfile start
+
+echo "PostgreSQL started successfully!"
