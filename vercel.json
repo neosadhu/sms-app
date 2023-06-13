@@ -1,13 +1,20 @@
 {
     "version": 2,
     "builds": [
-        {
-            "src": "bin/start_server",
-            "use": "@vercel/python"
-        }
+      {
+        "src": "bin/start_script",
+        "use": "@vercel/python"
+      }
     ],
     "routes": [
-        { "src": "/messages", "dest": "/messages" },
-        { "src": "/message", "dest": "/message" }
+      {
+        "src": "/messages",
+        "dest": "bin/start_script"
+      },
+      {
+        "src": "/message",
+        "dest": "bin/start_script"
+      }
     ]
-}
+  }
+  

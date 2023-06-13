@@ -11,7 +11,9 @@ mail_client = MailJetClient(api_key,api_secret)
 app = Flask(__name__)
 db_client = util.connect_to_db()
 
-
+@app.route('/', methods = ['GET'])
+def helloworld():
+    return("HELLOWORLD")
 
 @app.route('/messages',methods = ['POST','GET'])
 def messages():
