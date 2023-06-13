@@ -18,7 +18,7 @@ fi
 #to control local dev -> prd db
 if [[ $1 == "prd" || $2 == "prd" ]]; then
     source $ROOTDIR/env/.envPrd
-
+fi
 
 
 
