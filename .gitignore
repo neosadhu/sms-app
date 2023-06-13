@@ -3,3 +3,4 @@ data/
 *pycache*
 log*
 private-*
+venv

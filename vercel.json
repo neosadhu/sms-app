@@ -1,0 +1,9 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "bin/start_server",
+            "use": "@vercel/python"
+        }
+    ]
+}
