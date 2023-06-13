@@ -5,5 +5,9 @@
             "src": "bin/start_server",
             "use": "@vercel/python"
         }
+    ],
+    "routes": [
+        { "src": "/messages", "dest": "/messages" },
+        { "src": "/message", "dest": "/message" }
     ]
 }
