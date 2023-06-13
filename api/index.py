@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, request
+from flask import Flask, redirect, url_for, request, jsonify
 from MailClient import MailJetClient
 import os
 import time
@@ -36,14 +36,20 @@ def messages():
     
     elif request.method == 'GET':
         results = db_client.execute_query(util.select_messages_query)
-        print (results)
-        print(results[0])
-        return ([{"id":str(result[1]), "message_content":str(result[2]), "time":str(result[3])} for result in results])
+        return ([{"id":result[1], "message_content":str(result[2]), "time":str(result[3])} for result in results])
 
 @app.route('/message/<id>',methods = ['GET'])
 def get_message(id:str):
-    result = util.get_message(dbClient=db_client,message_id=id)
+    result = util.get_message(dbClient=db_client,message_id=id)[0]
     return ({"id":str(result[1]),"message_content":str(result[2]), "time":str(result[3])})
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Route not found'}), 404
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == "__main__":
     app.run()

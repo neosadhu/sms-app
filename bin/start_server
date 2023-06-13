@@ -2,10 +2,29 @@
 set -a
  # automatically export all variables
 
+#get some necessary vars
+ROOTDIR=$(PWD)
+PYTHONPATH=$ROOTDIR
+OS=$(uname)
+
+if [ "$OS" == "Darwin" ]; then
+    # source $ROOTDIR/env/.envPrd
+    source $ROOTDIR/env/.envLocal
+    # source $ROOTDIR/env/.envPrd
+elif [ "$OS" == "Linux" ]; then
+    source $ROOTDIR/env/.envPrd
+fi
+
+#to control local dev -> prd db
+if [[ $1 == "prd" || $2 == "prd" ]]; then
+    source $ROOTDIR/env/.envPrd
+
+
+
 
 # Function to install Python 3.11.4 based on the operating system
 install_python() {
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    if [[ "$OS" == "linux-gnu"* ]]; then
         # Linux
         if [[ -n "$(command -v apt-get)" ]]; then
             # Debian/Ubuntu
@@ -20,7 +39,7 @@ install_python() {
             echo "Unsupported package manager for Python installation. Exiting..."
             exit 1
         fi
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
+    elif [[ "$OS" == "darwin"* ]]; then
         # macOS
         if [[ -n "$(command -v brew)" ]]; then
             # Homebrew
@@ -35,6 +54,23 @@ install_python() {
         echo "Unsupported operating system. Exiting..."
         exit 1
     fi
+}
+
+run_migration() {
+    migration_directory=$ROOTDIR/"db/migrations"
+
+    # Loop through each SQL script in the directory
+    for migration_script in "$migration_directory"/*.sql; do
+    # Check if the file is a regular file
+        if [ -f "$migration_script" ]; then
+            echo "Running migration: $migration_script"
+            # Run the migration using psql
+            psql "host=$HOST port=$PORT dbname=$DATABASE user=$USER \
+            password=$PASSWORD options=$ENDPOINT" -w -f "$migration_script"
+
+
+        fi
+    done
 }
 
 # Check if Python 3.11.4 is installed
@@ -55,33 +91,16 @@ fi
 echo "Setting up virtual environment"
 python3.11 -m venv venv
 source venv/bin/activate
+which python3
 
 # Install requirements from requirements.txt
+echo "Installing dependencies..."
+pip3 install -r requirements.txt
 
-if ! pip3 freeze -r requirements.txt >/dev/null 2>&1; then
-    echo "Installing dependencies..."
-    pip3 install -r requirements.txt
+#run migrations
+run_migration
 
-    echo "Dependcies completed successfully."
-
-else
-  echo "Skipping Installation.Dependencies are already installed."
-fi
-
-
-ROOTDIR=$(PWD)
-PYTHONPATH=$ROOTDIR
-
-OS=$(uname)
-
-if [ "$OS" == "Darwin" ]; then
-    # source $ROOTDIR/env/.envPrd
-    source $ROOTDIR/env/.envLocal
-elif [ "$os_type" == "Linux" ]; then
-    source $ROOTDIR/env/.envPrd
-fi
-
-# #run on debug if enabled. 
+# # #run on debug if enabled. 
 if [ "$1" = "debug" ]; then
     echo "Debug mode"
     echo "Running flask app"

@@ -19,7 +19,7 @@ class PostgresDAO:
         self.cursor=self.conn.cursor()
         
     def _create_conn(self):
-        if socket.gethostname() != "Bipops-MBP.attlocal.net":
+        if os.getenv('HOST') != 'localhost':
             conn = psycopg2.connect(
                         host=self.host,
                         database=self.database,
@@ -54,8 +54,6 @@ class PostgresDAO:
             #FOR insertion dont return anything for FETCH return result
             try: 
                 results = self.cursor.fetchall()
-                if len(results) == 1:
-                    return results[0]
                 return results
             except psycopg2.ProgrammingError as e:
                 print ("No rows to return")
